@@ -41,7 +41,7 @@ func crop(img image.Image, skipTr bool) *image.RGBA {
 	}
 	rect := image.Rectangle{
 		Min: image.Point{X: xs, Y: ys},
-		Max: image.Point{X: xe, Y: ye},
+		Max: image.Point{X: xe + 1, Y: ye + 1},
 	}
 	if skipTr {
 		rect.Min = image.ZP
