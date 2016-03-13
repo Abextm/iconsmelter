@@ -27,7 +27,8 @@ func main() {
 	outB[0] = out0
 	outB[1] = out1
 	last := Normal
-	for i := 2; i < Sheets; i++ {
+	last, outB[2] = SheetBuilder(2, 32*32, true, last) //Notes get a taller image
+	for i := 3; i < Sheets; i++ {
 		last, outB[i] = SheetBuilder(i, 8*32, true, last)
 	}
 	out := make(chan OutItemKP, 10)

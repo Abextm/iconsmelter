@@ -141,9 +141,10 @@ func SheetBuilder(sheetID int, colHeight int, removeBG bool, fallback chan *Load
 
 		fmt.Printf("%v - Saving\n", sheetID)
 
+		tmpfi := "iconsmelter/uncrushed" + sheetName
 		//save the sheet
 		func() {
-			fi, err := os.OpenFile("iconsmelter/uncrushed"+sheetName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+			fi, err := os.OpenFile(tmpfi, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
 			if err != nil {
 				panic(err)
 			}
@@ -158,7 +159,7 @@ func SheetBuilder(sheetID int, colHeight int, removeBG bool, fallback chan *Load
 
 		fmt.Printf("%v - Crushing\n", sheetID)
 
-		crush(sheetName)
+		crush(tmpfi, "static/os/ico/"+sheetName)
 
 		fmt.Printf("%v - Done\n", sheetID)
 		close(out)
