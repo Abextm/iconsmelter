@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"io"
 	"io/ioutil"
+	"os"
 )
 
 var threads = 8
@@ -20,7 +22,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	BaseImage(2, 4208)
+	BaseImage(4, 229)
+	BaseImage(5, 11732)
+	BaseImage(6, 13167)
+	BaseImage(7, 1925)
+	BaseImage(8, 8007)
+	BaseImage(9, 11477)
+	BaseImage(10, 5376)
+	BaseImage(11, 1931)
+	BaseImage(13, 1978)
 	Normal, out0 := SheetBuilder(0, 32*48, false, nil)
 	Slider, out1 := SheetBuilder(1, 372, false, nil)
 	outB := make([]chan OutItemKP, Sheets)
@@ -37,7 +48,7 @@ func main() {
 	go func() {
 		for _, Item := range Items {
 			it := &LoadedItem{
-				Image: LoadAndCrop(fmt.Sprintf("iconsmelter/icons/%v.png", Item.ID)),
+				Image: LoadAndCrop(ItemPath(Item.ID)),
 				ID:    fmt.Sprint(Item.ID),
 			}
 			if Item.Name == "Sliding piece" || Item.Name == "Sliding button" {
@@ -63,6 +74,17 @@ func main() {
 	ioutil.WriteFile("oldschool/db/itemlist/coords.json", d, 0777)
 }
 
+func ItemPath(id int) string {
+	return fmt.Sprintf("iconsmelter/icons/%v.png", id)
+}
+
+func BaseImage(bgi, id int) {
+	err := cp(fmt.Sprintf("static/os/ico/bg%v.png", bgi), ItemPath(id))
+	if err != nil {
+		panic(err)
+	}
+}
+
 type LoadedItem struct {
 	Image *image.RGBA
 	ID    string
@@ -86,8 +108,27 @@ type OutItemKP struct {
 }
 
 type ItemListItem struct {
-	ID      int
-	Name    string
-	Members bool
-	Noted   bool
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Members bool   `json:"members"`
+	Noted   bool   `json:"noted"`
+}
+
+func cp(dst, src string) error {
+	s, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	// no need to check errors on read only file, we already got everything
+	// we need from the filesystem, so nothing can go wrong now.
+	defer s.Close()
+	d, err := os.OpenFile(dst, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0777)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(d, s); err != nil {
+		d.Close()
+		return err
+	}
+	return d.Close()
 }
