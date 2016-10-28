@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
-	"io"
+	"image/png"
 	"io/ioutil"
 	"os"
 )
@@ -79,7 +79,12 @@ func ItemPath(id int) string {
 }
 
 func BaseImage(bgi, id int) {
-	err := cp(fmt.Sprintf("static/os/ico/bg%v.png", bgi), ItemPath(id))
+	fi, err := os.OpenFile(fmt.Sprintf("static/os/ico/bg%v.png", bgi), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0777)
+	if err != nil {
+		panic(err)
+	}
+	oi := LoadAndCrop(ItemPath(id))
+	err = png.Encode(fi, oi)
 	if err != nil {
 		panic(err)
 	}
@@ -112,23 +117,4 @@ type ItemListItem struct {
 	Name    string `json:"name"`
 	Members bool   `json:"members"`
 	Noted   bool   `json:"noted"`
-}
-
-func cp(dst, src string) error {
-	s, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	// no need to check errors on read only file, we already got everything
-	// we need from the filesystem, so nothing can go wrong now.
-	defer s.Close()
-	d, err := os.OpenFile(dst, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0777)
-	if err != nil {
-		return err
-	}
-	if _, err := io.Copy(d, s); err != nil {
-		d.Close()
-		return err
-	}
-	return d.Close()
 }
